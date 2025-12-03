@@ -16,3 +16,5 @@ To test it :
 5a. To send, create some (supported) geometries in FreeCAD (Part Workbench)
 5b. To receive, create some (supported) geometries in an external software (ex. Rhino), send them to Speckle
 6. Run one of the macro  
+
+Test
