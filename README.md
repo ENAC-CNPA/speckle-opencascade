@@ -6,8 +6,8 @@ speckle-opencascade was developed as a research project conducted at the LAPIS l
 speckle-opencascade is a prototype Speckle connector for OpenCascade.
 Speckle is a collaborative platform for exchanging 3D and data for AEC, while opencascade is a geometric kernel: both are open-source.
 This prototype was designed with two long-term goals in mind:
-*to serve as a basis for developing connectors for any software based on OpenCascade, such as FreeCAD.
-*to provide Speckle with geometric computation capabilities.
+* to serve as a basis for developing connectors for any software based on OpenCascade, such as FreeCAD.
+* to provide Speckle with geometric computation capabilities.
 
 ## Features
 The code is written in Python, taking advantage of Python interfaces available for both Speckle and OpenCascade ecosystems from the specklepy and python-occ-core libraries (see Dependencies).
@@ -28,9 +28,13 @@ They can be des/activated, commenting the line with # :
 #received = operations.receive("5369930079697d28c4568dc2d99b6d97", transport) # closed curved planar face, extruded
 received = operations.receive("ac4aae21998abfa560084adbe02fbd5e", transport) # curved face deformed in 3D, with curved hole, extruded  
 ```
-The id (example: ac4aae21998abfa560084adbe02fbd5e) refers to the id of the general collection that contains the object, as shown in this screenshot:
+The id (example: ac4aae21998abfa560084adbe02fbd5e) refers to the id of the general collection which contains the object, as shown in this screenshot:
 
 ![speckle-viewer](docs/images/speckle-viewer.jpg)
+
+Once the script is launched, the data is downloaded from the Speckle URL, the geometry is read according to its Speckle definition and reconstructed using the OpenCascade language, then a viewer is launched to display the result:
+
+![occ-viewer](docs/images/opencascade-viewer.jpg)
 
 ### Sending from OpenCascade to Speckle
 The *breps* folder contains a set of geometries modeled to test the development of the occ-send script.
@@ -46,6 +50,7 @@ breptools.Read(shape, "./breps/from rhino/faces5.brep", builder)
 Our sending algorithm doesn't yet include the mesh representation of the object along with its geometric definition.
 The mesh representation is used by Speckle viewer to display the object, therefore to get a visual result of the script you need to receive the object in the Speckle connector of a software which can rebuild it from its geometric definition, typically Rhino.
 
+## Initial phase of development as Macro for FreeCAD
 The *freecad (archive)* folder contains the scripts developed during the initial phase of the project. At this stage, the code was developed directly as a FreeCAD macro. These files are kept for reference purposes, but the code is no longer maintained.
 
 ## Note on the Speckle version
@@ -54,6 +59,7 @@ https://github.com/specklesystems/specklepy/blob/46c18bbe6b090b5153662a0b4db92cf
 
 ## Recommended python setup (similar to ours)
 1. Install Anaconda
+
 2. From the Anaconda interface: add an environment and name it pythonocc, choosing Python 3.10
    a. Add conda-forge as a channel
    b. Install pythonocc-core from conda-forge
@@ -66,11 +72,13 @@ https://github.com/specklesystems/specklepy/blob/46c18bbe6b090b5153662a0b4db92cf
 3. Open your folder in VS Code
    a. Open the terminal
    b. To activate the environment created in Anaconda, run the following commands:
-      1. ```cmd```
-      2. ```[PATH]\Anaconda3\Scripts\activate.bat```
-      3. ```conda activate [PATH]\AppData\Local\anaconda3\envs\pythonocc```
+   1. ```cmd```
+   2. ```[PATH]\Anaconda3\Scripts\activate.bat```
+   3. ```conda activate [PATH]\AppData\Local\anaconda3\envs\pythonocc```
+
 4. Install specklepy in this environment, running:
 ```pip install specklepy```
+
 Note: Each time you reopen the project in VS Code, repeat step 3 to activate the Python environment created with Anaconda.
 
 ## Dependencies
