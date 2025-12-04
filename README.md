@@ -61,9 +61,9 @@ https://github.com/specklesystems/specklepy/blob/46c18bbe6b090b5153662a0b4db92cf
 1. Install Anaconda
 
 2. From the Anaconda interface: add an environment and name it pythonocc, choosing Python 3.10
-   a. Add conda-forge as a channel
-   b. Install pythonocc-core from conda-forge
-   c. Test it. Click on play to open a terminal and run:
+   1. Add conda-forge as a channel
+   2. Install pythonocc-core from conda-forge
+   3. Test it. Click on play to open a terminal and run:
 ```
 from OCC.Core.gp import *
 p = gp_Pnt(1,2,3)
@@ -71,11 +71,11 @@ p.X()
 ```
 
 3. Open your folder in VS Code
-   a. Open the terminal
-   b. To activate the environment created in Anaconda, run the following commands:
-   1. ```cmd```
-   2. ```[PATH]\Anaconda3\Scripts\activate.bat```
-   3. ```conda activate [PATH]\AppData\Local\anaconda3\envs\pythonocc```
+   1. Open the terminal
+   2. To activate the environment created in Anaconda, run the following commands:
+      1. ```cmd```
+      2. ```[PATH]\Anaconda3\Scripts\activate.bat```
+      3. ```conda activate [PATH]\AppData\Local\anaconda3\envs\pythonocc```
 
 4. Install specklepy in this environment, running:
 ```pip install specklepy```
