@@ -1,63 +1,66 @@
-from OCC.Display.SimpleGui import init_display
-from OCC.Core.BRepTools import breptools_Read
-from OCC.Core.TopoDS import TopoDS_Shape, topods, TopoDS_Face
-from OCC.Core.TopExp import TopExp_Explorer
-from OCC.Core.TopExp import topexp
-from OCC.Core.BRep import BRep_Builder
-from OCC.Core.Geom import Geom_BSplineCurve, Geom_RectangularTrimmedSurface
-from OCC.Core.BRep import BRep_Tool
-from OCC.Core.TopAbs import TopAbs_EDGE, TopAbs_REVERSED, TopAbs_FORWARD
-from OCC.Core.Geom import Geom_Line, Geom_BSplineSurface, Geom_Plane
-from OCC.Core.BRepTools import breptools, breptools_OuterWire
-from OCC.Core.TopTools import TopTools_IndexedMapOfShape
-from OCC.Core.TopTools import TopTools_ShapeMapHasher
-from OCC.Core.Geom import Geom_BSplineSurface
-from OCC.Core.gp import gp_Pln, gp_Pnt, gp_Circ, gp_Ax2, gp_Dir
-from OCC.Core.GeomAdaptor import GeomAdaptor_Surface
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeVertex, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeShell, BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
-from OCC.Core.GeomConvert import geomconvert
-from OCC.Core.TColgp import TColgp_Array2OfPnt
-from OCC.Core.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
-from OCC.Core.Geom2d import Geom2d_Line
-from OCC.Core.gp import gp_Pnt2d
-from OCC.Core.gp import gp_Pln, gp_Ax3
+# Import OCC libraries
+from OCC.Core.BRep import BRep_Builder, BRep_Tool
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+from OCC.Core.BRepTools import breptools
+from OCC.Core.Geom import Geom_BSplineCurve, Geom_BSplineSurface, Geom_RectangularTrimmedSurface
 from OCC.Core.GeomAPI import geomapi
-from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
+from OCC.Core.GeomConvert import geomconvert
+from OCC.Core.gp import gp_Pln, gp_Ax3
+from OCC.Core.TColStd import TColStd_Array1OfReal
 from OCC.Core.TopAbs import (
-    TopAbs_VERTEX,
+    TopAbs_COMPOUND,
+    TopAbs_COMPSOLID,
     TopAbs_EDGE,
-    TopAbs_WIRE,
     TopAbs_FACE,
+    TopAbs_FORWARD,
+    TopAbs_REVERSED,
     TopAbs_SHELL,
     TopAbs_SOLID,
-    TopAbs_COMPSOLID,
-    TopAbs_COMPOUND,
-    TopAbs_ShapeEnum
+    TopAbs_VERTEX,
+    TopAbs_WIRE
 )
-display, start_display, add_menu, add_function_to_menu = init_display()
+from OCC.Core.TopExp import topexp, TopExp_Explorer
+from OCC.Core.TopoDS import TopoDS_Shape, topods
+from OCC.Core.TopTools import TopTools_IndexedMapOfShape
+from OCC.Display.SimpleGui import init_display
 
-#import Speckle libraries
-from typing import List
+# Import Speckle libraries
 from specklepy.api.client import SpeckleClient
 from specklepy.api.credentials import get_default_account
-from specklepy.objects import Base
 from specklepy.objects.geometry import (
-     Box, Brep, BrepEdge, BrepFace, BrepLoop, BrepLoopType, BrepTrim, BrepTrimType, Circle, Curve, Interval, Line, Mesh, Plane, Point, Polyline, Surface, Vector
+    Box, 
+    Brep, 
+    BrepEdge, 
+    BrepFace, 
+    BrepLoop, 
+    BrepTrim, 
+    BrepTrimType, 
+    Curve, 
+    Interval, 
+    Line, 
+    Mesh, 
+    Plane, 
+    Point, 
+    Polyline, 
+    Surface, 
+    Vector
 )
 from specklepy.objects.other import Collection
 
-#set links to Speckle
+# Initialize OCC display
+display, start_display, add_menu, add_function_to_menu = init_display()
+
+# Connect to Speckle
 client = SpeckleClient(host="https://app.speckle.systems/")
 account = get_default_account()
 client.authenticate_with_account(account)
 stream_id = "864c4d4027"
 
-#set container of all elements
+# Set container of all elements
 data = Collection()
 data.elements = []
 
-
-# Functions
+# Conversion functions
 def vertex_from_occ_to_speckle(vertex):
     o_point = BRep_Tool.Pnt(vertex)
     s_Vertex = Point(x = o_point.Y(), y = o_point.Y(), z = o_point.Z())
@@ -87,16 +90,15 @@ def curve_from_occ_to_speckle(edge):
     curve, u_min, u_max = BRep_Tool.Curve(edge)
     
     if curve.DynamicType().Name() == "Geom_Line":
-        
         # Get 3D points
         p_start = curve.Value(u_min)
         p_end = curve.Value(u_max)
 
-        # Convert to Speckle Points
+        # Convert to Speckle points
         sp_start = Point(x=p_start.X(), y=p_start.Y(), z=p_start.Z())
         sp_end = Point(x=p_end.X(), y=p_end.Y(), z=p_end.Z())
 
-        # Create Speckle Line
+        # Create Speckle line
         s_curve = Line(
             start=sp_start,
             end=sp_end,
@@ -163,7 +165,7 @@ def curve_from_occ_to_speckle(edge):
     return(s_curve)
 
 def edge_from_occ_to_speckle(edge, Curve3dIndex, vertices_map):
-    Curve3dIndex = Curve3dIndex - 1 #index in occ starts from 1, while index in speckle start from 0
+    Curve3dIndex = Curve3dIndex - 1 # Index in OCC starts from 1, while index in Speckle starts from 0
     StartVertex = topods.Vertex(topexp.FirstVertex(edge))
     EndVertex = topods.Vertex(topexp.LastVertex(edge))
     StartIndex = vertices_map.FindIndex(StartVertex) - 1
@@ -229,7 +231,7 @@ def surface_from_occ_to_speckle(o_b_spline_surface: Geom_BSplineSurface):
     closed_v = o_b_spline_surface.IsVClosed()
     u_min, u_max, v_min, v_max = o_b_spline_surface.Bounds()
     
-    # Constructing the Speckle Surface object
+    # Constructing the Speckle surface object
     s_surface = Surface(
         degreeU = degree_u,
         degreeV = degree_v,
@@ -257,8 +259,29 @@ def create_mesh(shape):
     )
 """
 
-# Convert the BREP
-# Optional: name mapping for convenience
+# Convert the object
+
+shape = TopoDS_Shape()
+builder = BRep_Builder()
+
+# Load the .brep file into OCC
+# Theses geometries were modeled and exported as .brep from FreeCAD, 
+# or modeled in Rhino, exported/imported in FreeCAD via stp format and exported as .brep from FreeCAD (from rhino folder)
+
+# Is working at reception in Rhino:
+
+#breptools.Read(shape, "./breps/line.brep", builder) 
+#breptools.Read(shape, "./breps/curve.brep", builder) 
+#breptools.Read(shape, "./breps/from rhino/curved planar face.brep", builder)
+#breptools.Read(shape, "./breps/triangular-extrusion.brep", builder)
+#breptools.Read(shape, "./breps/surface.brep", builder)
+breptools.Read(shape, "./breps/from rhino/faces5.brep", builder) # two planar faces, one with a hole
+
+# Is not working at reception in Rhino:
+
+#breptools.Read(shape, "./breps/from rhino/curved planar face with hole.brep", builder)
+#breptools.Read(shape, "./breps/from rhino/rolex.brep", builder)
+
 shape_type_names = {
     TopAbs_VERTEX: "VERTEX",
     TopAbs_EDGE: "EDGE",
@@ -270,24 +293,9 @@ shape_type_names = {
     TopAbs_COMPOUND: "COMPOUND"
 }
 
-# Load the brep file
-# "From Rhino" sont des objets modélisés sur Rhino et exportés en step, puis ouverts dans FreeCAD et exportés en .brep
-# En effet, Rhino n'a pas d'export .brep
-# Les autres sont modélisés directement dan FreeCAD
-shape = TopoDS_Shape()
-builder = BRep_Builder()
-#breptools.Read(shape, "./breps/line.brep", builder) #= ok
-#breptools.Read(shape, "./breps/curve.brep", builder) #= ok
-#breptools.Read(shape, "./breps/from rhino/faces5.brep", builder) #= ok (deux faces planes dont une avec un trou)
-#breptools.Read(shape, "./breps/from rhino/curved planar face.brep", builder)
-breptools.Read(shape, "./breps/from rhino/curved planar face with hole.brep", builder) #= pas ok
-
-#breptools.Read(shape, "./breps/surface.brep", builder)
-#breptools.Read(shape, "./breps/triangular-extrusion.brep", builder)
-
 has_face = False
 
-# Loop through all shape types and count them
+# Loop through all shape types and sort objects with faces to handle as BReps :
 for shape_type in shape_type_names:
     explorer = TopExp_Explorer(shape, shape_type)
     count = 0
@@ -298,9 +306,17 @@ for shape_type in shape_type_names:
         if shape_type == TopAbs_FACE:
             has_face = True
             
-# After the loop, you can use:
-if has_face: #handle as BREP
-    
+# Handle as curve
+if not has_face:
+    edge_explorer = TopExp_Explorer(shape, TopAbs_EDGE)
+    while edge_explorer.More():
+        edge = topods.Edge(edge_explorer.Current())
+        s_curve = curve_from_occ_to_speckle(edge)
+        data.elements.append(s_curve)
+        edge_explorer.Next()
+            
+# Handle as BRep :
+else:
     s_Surfaces = []
     s_Curve3D = []
     s_Curve2D = []
@@ -309,10 +325,10 @@ if has_face: #handle as BREP
     s_Loops = []
     s_Faces = []
     s_Trims = []
-    s_IsClosed = True #still to get from OCC
-    s_Orientation = 1 #still to get from OCC
+    s_IsClosed = True # As default, still to get from OCC
+    s_Orientation = 1 # As default, still to get from OCC
     
-    # Create Speckle Vertices
+    # Create Speckle vertices
     vertex_explorer = TopExp_Explorer(shape, TopAbs_VERTEX)
     vertices_map = TopTools_IndexedMapOfShape()    
     while vertex_explorer.More():
@@ -360,7 +376,7 @@ if has_face: #handle as BREP
             
             # Surfaces
             o_surface = BRep_Tool.Surface(o_face)
-            # Convert each surface to bspline surface
+            # Convert each surface to BSpline Surface
             if not isinstance(o_surface, Geom_BSplineSurface):
                 u1, u2, v1, v2 = breptools.UVBounds(o_face)
                 trimmed_surface = Geom_RectangularTrimmedSurface(o_surface, u1, u2, v1, v2)
@@ -455,10 +471,10 @@ if has_face: #handle as BREP
     print("Edges:", len(s_Edges))
     for i,e in enumerate(s_Edges):
         print("Edge", i, ": Curve3dIndex =", e.Curve3dIndex, "TrimIndices =", e.TrimIndices, "StartIndex =", e.StartIndex, "EndIndex =", e.EndIndex)
-    print("Loops nombre:", len(s_Loops))
+    print("Loops count:", len(s_Loops))
     for i,l in enumerate(s_Loops):
         print("Loop", i, ": FaceIndex =", l.FaceIndex, "TrimIndices =", l.TrimIndices)
-    print("Faces nombre:", len(s_Faces))
+    print("Faces count:", len(s_Faces))
     for i,f in enumerate(s_Faces):
         print("Face", i, ": SurfaceIndex =", f.SurfaceIndex, "OuterLoopIndex =", f.OuterLoopIndex, "LoopIndices =", f.LoopIndices)
     print("Trims:", len(s_Trims))
@@ -466,7 +482,7 @@ if has_face: #handle as BREP
         print("Trim", i, "EdgeIndex =", t.EdgeIndex, "StartIndex =", t.StartIndex, "EndIndex =", t.EndIndex, "FaceIndex =", t.FaceIndex, "LoopIndex =", t.LoopIndex, "CurveIndex =", t.CurveIndex, "IsReversed =", t.IsReversed)
 
 
-    #WIP mesh
+    # WIP mesh
     s_mesh = Mesh(
         Vertices = [650, -100, 0, 602.4471435546875, -134.5491485595703, 0, 620.6107177734375, -190.4508514404297, 0, 679.3892822265625, -190.4508514404297, 0, 697.5528564453125, -134.5491485595703, 0],
         Faces = [3, 4, 1, 2, 3, 0, 1, 4, 3, 3, 4, 2]
@@ -487,8 +503,8 @@ if has_face: #handle as BREP
         provenance = "python-occ",
         _displayValue = [s_mesh],
         applicationId = "0123456789", # WIP
-        volume = "123", #WIP
-        area = "1234", #WIP
+        volume = "123", # WIP
+        area = "1234", # WIP
         bbox = Box(
             basePlane = Plane(
                 origin = Point(
@@ -529,18 +545,7 @@ if has_face: #handle as BREP
         )
     )
     
-    #add to data to be sent
     data.elements.append(s_Brep)
-        
-else:
-    # handle as curve
-    edge_explorer = TopExp_Explorer(shape, TopAbs_EDGE)
-    while edge_explorer.More():
-        edge = topods.Edge(edge_explorer.Current())
-        s_curve = curve_from_occ_to_speckle(edge)
-        #add to data to be sent
-        data.elements.append(s_curve)
-        edge_explorer.Next()
     
 # Data of collection
 data.name = "MyCollection" #WIP
@@ -549,7 +554,7 @@ data.applicationId = "0987654321" # WIP
 data.collectionType = "layer"
 data.totalChildrenCount = 1
 
-#send to Speckle
+# Send to Speckle
 from specklepy.transports.server import ServerTransport
 from specklepy.api import operations
 transport = ServerTransport(client=client, stream_id=stream_id)

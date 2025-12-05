@@ -11,7 +11,7 @@ This prototype was designed with two long-term goals in mind:
 
 ## Features
 The code is written in Python, taking advantage of Python interfaces available for both Speckle and OpenCascade ecosystems from the specklepy and python-occ-core libraries (see Dependencies).
-Please refer to the documentation of these two libraries for a general introduction, especially on how to connect your python code to your speckle account.
+Please refer to the documentation of these two libraries for a general introduction, especially on how to connect your python code to your Speckle account.
 
 The prototype consists of two scripts:
 * *occ-receive.py* allows geometries to be received from Speckle to OpenCascade. 

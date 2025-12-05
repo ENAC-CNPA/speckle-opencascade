@@ -1,7 +1,3 @@
-# The code below works. 
-# To trim surfaces, it doesn't project 3D curves on 2D curves related to the surface (pcurves), but do it directly in 3D.
-# The resulting face is not directly clean and requires ShapeFix_Shape.
-
 # Initialize python-occ
 from OCC.Core.BRep import BRep_Builder, BRep_Tool
 from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeVertex, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace, BRepBuilderAPI_MakeWire, BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
@@ -15,7 +11,7 @@ from OCC.Core.TopAbs import TopAbs_VERTEX, TopAbs_FORWARD, TopAbs_REVERSED
 from OCC.Core.TopExp import TopExp_Explorer
 from OCC.Display.SimpleGui import init_display
 
-# Initialize the display
+# Initialize OCC display
 display, start_display, add_menu, add_function_to_menu = init_display()
 
 # Initialize Speckle
@@ -28,11 +24,11 @@ if __name__ == "__main__":
 
     transport = wrapper.get_transport()
  
-    #Objects sent from Rhinoceros 3D to Speckle :
+    # Objects sent from Rhinoceros 3D to Speckle :
     
-    #Is working:
+    # Is working:
     
-    #Curves :
+    # Curves :
     #received = operations.receive("fa8b2bea472ea99eb074585802c144c1", transport) # point
     #received = operations.receive("4b6b20120c4270406e8cefb0e31d8e6e", transport) # line
     #received = operations.receive("c0efbf4617325abdb10c5d85f192fdad", transport) # polyline
@@ -40,7 +36,7 @@ if __name__ == "__main__":
     #received = operations.receive("a65d3dec8951963906ff9c122b874675", transport) # arc
     #received = operations.receive("26d680179faff3c9be98f88aa5de71d3", transport) # curve
     
-    #Planar faces:
+    # Planar faces:
     #received = operations.receive("348518420eaa2f0e1c6c0c6bd92d2b89", transport) # triangular face
     #received = operations.receive("4ba26e43e5b70463cdb060b36cc448d3", transport) # rectangular face
     #received = operations.receive("cdc9f429541627224c00610898c664d7", transport) # pentagonal face
@@ -50,7 +46,7 @@ if __name__ == "__main__":
     #received = operations.receive("7b9ef1e597899c804f833d17d917ae05", transport) # face with mix of edges types
     #received = operations.receive("658ef9b63021d1266573c00f527c2bdc", transport) # cylinder, only lower and upper faces
     
-    #Planar faces with holes:
+    # Planar faces with holes:
     #received = operations.receive("161c29e5346e8988ab87c00aa5477630", transport) # triangular face with triangular hole
     #received = operations.receive("1008040021ab18d29392598684ffe569", transport) # pentagonal face with pentagonal hole
     #received = operations.receive("90f988a827c1021abc3125f69e3c70b3", transport) # pentagonal face with circular hole
@@ -61,45 +57,42 @@ if __name__ == "__main__":
     #received = operations.receive("0298c70cbe7783aefd1a8d0ae3bd6a92", transport) # curved planar face with curved hole
     #received = operations.receive("2f4c57e6f1535a8edd0a0c8e6eb89d98", transport) # curved planar face with two curved holes
     
-    #3D faces
+    # 3D faces
     #received = operations.receive("3b320207576b80c0134fde287653806e", transport) # rectangular face deformed in 3D
     #received = operations.receive("9c6c57fc183435879178ea8b73ebf963", transport) # trimmed rectangular face deformed in 3D
     #received = operations.receive("93b7da1e9cd0c00101998e4fda51d800", transport) # triangular face deformed in 3D
     #received = operations.receive("42bb9190e8dc0c071898bb434e274f9d", transport) # dome-like shape = loft of arcs of circles
     #received = operations.receive("81539f5dcbf1b439c34684dc745aa1d2", transport) # portion of cylinder, without lower and upper faces, sent from grasshopper to control edges
     
-    #3D faces with holes:
-    #received = operations.receive("bc043113ca32744823c6c627f934469e", transport) # trimmed rectangular face deformed in 3D, with hole
+    # 3D faces with holes:
+    received = operations.receive("bc043113ca32744823c6c627f934469e", transport) # trimmed rectangular face deformed in 3D, with hole
     #received = operations.receive("c11c75b599c6066668481aa22d5c3719", transport) # curved face deformed in 3D, with curved hole
     
-    #Complex BReps with multiple faces and holes
+    # Complex BReps with multiple faces and holes
     #received = operations.receive("76bf73ff646a5833e7eb6145b035b44d", transport) # planar face with straight edges, extruded
     #received = operations.receive("794f4da8239920b851f820e77b457cc2", transport) # two planar triangular faces, one with a hole
     #received = operations.receive("7efc65e33c33f548e1c05ec425203164", transport) # pyramid = multiple faces
     #received = operations.receive("8b86058cc3d1f87ff8e47e1156e9a5e0", transport) # pyramid with one hole on one face
     #received = operations.receive("5369930079697d28c4568dc2d99b6d97", transport) # closed curved planar face, extruded
-    received = operations.receive("ac4aae21998abfa560084adbe02fbd5e", transport) # curved face deformed in 3D, with curved hole, extruded    
+    #received = operations.receive("ac4aae21998abfa560084adbe02fbd5e", transport) # curved face deformed in 3D, with curved hole, extruded    
     
-    #Is not working:
+    # Is not working:
     #received = operations.receive("de3d9777e53fac1b047ff019e594f63e", transport) # spherical triangular face
-    #received = operations.receive("97686fd99a42b3f3deae4cf1a2c71fdb", transport) #cylinder, all faces
-    #received = operations.receive("9216df6bd47121ddc75ee1b4abc87c5c", transport) #cylinder, without lower and upper faces
-    #received = operations.receive("6a903e7c6afa9f29c91ba2647d83fc72", transport) #curved planar face with two holes, extruded
+    #received = operations.receive("97686fd99a42b3f3deae4cf1a2c71fdb", transport) # cylinder, all faces
+    #received = operations.receive("9216df6bd47121ddc75ee1b4abc87c5c", transport) # cylinder, without lower and upper faces
+    #received = operations.receive("6a903e7c6afa9f29c91ba2647d83fc72", transport) # curved planar face with two holes, extruded
     
+    # Objects sent from python-occ through occ-send.py :
     
-    #Objects sent from pyton-occ with s.py
-    
-    #Is working:
+    # Is working:
     #received = operations.receive("86699b789249e00e1a554a6d647d1f2e", transport) # one triangular and one rectangular planar faces
     #received = operations.receive("55111a41e4a3f962917f174f67b91001", transport) # one triangular and two rectangular planar faces
     #received = operations.receive("67d2a43908c1854b4b4e790cbb282d78", transport) # two triangular and two rectangular planar faces
     #received = operations.receive("f96a51ac8d3c0bfe03193e29b25ed653", transport) # triangular face, extruded
     #received = operations.receive("066f7f70e2565c7350d5cff4f44ef247", transport) # one triangular and one rectangular planar faces, one with a hole
 
-    
-    #Is not working:
+    # Is not working:
     #received = operations.receive("7609c3333acbf65cbb347ab37f0cc8f8", transport) #two triangular and two rectangular planar faces, one with a hole
-    
     
 all_elements = []
 
